@@ -83,14 +83,32 @@ Legend: 🟢 early / foundational · 🟡 mid · 🔵 later / advanced
 - Article angle: "caching patterns and the two hard problems (naming, invalidation)."
 
 ## 14. Queueing & messaging technologies 🟡
-- Contrast the messaging models we use:
-  - **Log / streaming** — Kafka (replayable, multi-consumer; already in the stack).
-  - **Work/task queue** — RabbitMQ or NATS (competing consumers, acks, DLQs).
-  - **Lightweight pub/sub** — NATS or Valkey streams.
+- Two distinct angles (we'll likely show both):
+  - **Alternatives to Kafka** — run the *same* job (e.g. the CDC/event fan-out or
+    a notification stream) on a different broker and compare: Kafka vs.
+    **Redpanda** (Kafka-API compatible), vs. **NATS JetStream**, vs.
+    **RabbitMQ streams**. What changes operationally, and what doesn't.
+  - **In addition to Kafka** — use a work queue *alongside* the event log where it
+    fits better: a task queue (RabbitMQ/NATS) for outbound notifications/emails,
+    while Kafka stays the replayable CDC event log.
+- Messaging models to contrast: **log/streaming** (replay, multi-consumer) vs.
+  **work/task queue** (competing consumers, acks, DLQs) vs. **pub/sub**.
 - Patterns: at-least-once delivery, dead-letter queues, backpressure, idempotency.
-- Where each fits: e.g. a queue for outbound notifications/emails vs. the Kafka
-  event log for CDC.
-- Article angle: "queue vs. log vs. pub/sub — picking the right messaging model."
+- Article angle: "queue vs. log vs. pub/sub, and when to swap or add a broker."
+- Note: Redpanda is BSL (not OSI-OSS); fine as a *comparison* target but we keep
+  the default stack on Apache/MIT/BSD tools.
+
+## 15. Search / full-text product search 🔵
+- A real store feature: search and filter widgets from the storefront
+  (`GET /search?q=...&filters=...`), with typo tolerance, facets, and ranking.
+- **Read model fed by CDC**: Catalog (and Inventory for in-stock filtering)
+  changes flow via Debezium → Kafka → a **search indexer** that maintains an
+  **OpenSearch** index — no extra query load on the operational DB (ties into #4).
+- Demonstrates the **CQRS read-model** idea: the search index is a denormalized
+  projection kept eventually consistent with the source of truth.
+- Reuses the OpenSearch already in the stack for observability — one engine, two
+  jobs (telemetry store + product search).
+- Article angle: "building a search feature as a CDC-driven read model."
 
 ---
 
@@ -104,5 +122,6 @@ Legend: 🟢 early / foundational · 🟡 mid · 🔵 later / advanced
 6. Durable workflows with Temporal ⭐
 7. REST vs. gRPC vs. events: choosing a transport
 8. Caching patterns with Valkey (and invalidation via CDC)
-9. Queue vs. log vs. pub/sub: picking a messaging model
-10. Monolith vs. microservices, measured not preached
+9. Queue vs. log vs. pub/sub: picking (and swapping) a messaging model
+10. Building product search as a CDC-driven read model
+11. Monolith vs. microservices, measured not preached

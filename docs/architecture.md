@@ -61,7 +61,7 @@ See [concepts.md](concepts.md) for what we demonstrate and
 | **Inventory** | Go | Stock levels (the "hot table") | `GET /stock/{id}`, `POST /stock/{id}/reserve` |
 | **Order** | Python | Order intake; orchestrates purchase | `POST /orders`, `GET /orders/{id}` |
 | **Payment** | Python | Mock payments w/ injectable failures | `POST /charges`, `POST /refunds` |
-| **BFF** | Python | Aggregates services for the UI | `GET /home`, `POST /checkout` |
+| **BFF** | Python | Aggregates services for the UI | `GET /home`, `GET /search`, `POST /checkout` |
 | **Web UI** | (simple SPA) | Visualize + drive the services | — |
 | **Fulfillment** | Go/Python | Temporal workflow worker | (Temporal, not HTTP) |
 | **Consumers** | Python | Search indexer + lake sink glue | (Kafka, not HTTP) |
@@ -88,6 +88,11 @@ See [concepts.md](concepts.md) for what we demonstrate and
   as its state change. Debezium captures the outbox off the WAL → Kafka.
 - **CDC** therefore drives both the search index and the lake export with **zero
   query load** on the operational tables — the headline demo.
+- **Search**: product search is a **CDC-driven read model** — Catalog/Inventory
+  changes flow via Debezium → Kafka → a **search indexer** that maintains an
+  **OpenSearch** index. The storefront queries that index (via the BFF) for
+  full-text search, facets, and in-stock filtering, with no extra load on the
+  operational DB (see concepts #15). Reuses the OpenSearch already in the stack.
 - **Caching**: a **Valkey** cache fronts a read-heavy path (e.g. Catalog reads),
   invalidated by CDC events so it stays fresh without dual writes (see concepts
   #13). Added under the `cache` profile.
