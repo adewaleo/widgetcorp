@@ -10,13 +10,18 @@ See [concepts.md](concepts.md) for what we demonstrate and
 
 ## Design principles
 
-1. **Each service teaches one concept** where possible.
+1. **Services are teaching devices** — a single service can illustrate several
+   concepts (e.g. Catalog shows a Go API, caching, *and* feeds search), and a
+   concept can span several services. We optimize for what's clearest to teach,
+   not a strict one-to-one mapping.
 2. **Contracts-first** — OpenAPI is the stable artifact; transport (REST → gRPC →
    events) can evolve without rewrites.
 3. **Evolvable by construction** — the outbox + CDC path exists from day one, so
    moving from REST to event-driven is additive.
 4. **Simple to run** — `docker compose` with profiles; boot only what a demo needs.
-5. **Open source only** — see the tooling table below.
+5. **Favor open source, but not exclusively** — default to OSS for the core stack
+   so anyone can run it freely; reach for managed or source-available tools when
+   they teach a concept better (and note the license tradeoff when we do).
 
 ## System overview
 
@@ -110,7 +115,7 @@ See [concepts.md](concepts.md) for what we demonstrate and
 | Later | **Event-driven** | consumers react to Kafka events instead of calling |
 | Later | **Durable workflow** | Temporal owns the multi-step fulfillment saga |
 
-## Cross-cutting infrastructure (all OSS)
+## Cross-cutting infrastructure (OSS-first defaults)
 
 | Concern | Tool | License |
 |---|---|---|
@@ -129,8 +134,12 @@ See [concepts.md](concepts.md) for what we demonstrate and
 | Load generation | Locust | MIT |
 | Database | PostgreSQL | PostgreSQL |
 
-Licensing note: MinIO is AGPL — a conscious choice for a demo repo; everything
-else is Apache/MIT.
+These are OSS-first defaults so the whole stack runs free out of the box (MinIO is
+AGPL; the rest Apache/MIT/BSD). We're not OSS-only by rule, though — where a
+managed or source-available tool teaches a concept better, we'll use it as a
+documented variant and note the license tradeoff (e.g. Redpanda or a cloud
+broker as a queueing comparison, a hosted OpenSearch/Elastic, or managed Temporal
+Cloud).
 
 ## Order placement (the canonical flow)
 
