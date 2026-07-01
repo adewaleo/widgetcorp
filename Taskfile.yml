@@ -1,0 +1,66 @@
+# WidgetCorp — top-level task runner (https://taskfile.dev)
+#
+# `task` lists all available tasks. Per-service tasks live in each service's
+# own Taskfile and are pulled in under a namespace as services are built
+# (e.g. `task catalog:build`). See docs/repo-structure.md.
+
+version: '3'
+
+vars:
+  # Compose files are added by later phases (deploy/compose.*.yml). The base
+  # file arrives with the "base docker-compose" roadmap item.
+  COMPOSE: docker compose -f deploy/docker-compose.yml
+
+# includes:
+#   catalog: ./services/catalog      # uncommented as each service is created
+#   inventory: ./services/inventory
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  # ---- meta -------------------------------------------------------------
+  roadmap:
+    desc: Regenerate docs/roadmap.md from the GitHub Project
+    cmds:
+      - tools/scripts/dump-roadmap.sh
+
+  # ---- fan-out (wired up as services land) ------------------------------
+  build:
+    desc: Build all services
+    cmds:
+      - 'echo "No services to build yet — add includes in Taskfile.yml as services are created."'
+
+  test:
+    desc: Test all services
+    cmds:
+      - 'echo "No services to test yet."'
+
+  lint:
+    desc: Lint all services
+    cmds:
+      - 'echo "No services to lint yet."'
+
+  # ---- stack orchestration (needs deploy/docker-compose.yml) ------------
+  up:
+    desc: Start the core stack (docker compose, core profile)
+    cmds:
+      - '{{.COMPOSE}} --profile core up -d'
+
+  down:
+    desc: Stop the stack and remove volumes
+    cmds:
+      - '{{.COMPOSE}} down -v'
+
+  ps:
+    desc: Show running services
+    cmds:
+      - '{{.COMPOSE}} ps'
+
+  logs:
+    desc: Tail logs (use `task logs -- <service>` for one)
+    cmds:
+      - '{{.COMPOSE}} logs -f {{.CLI_ARGS}}'
