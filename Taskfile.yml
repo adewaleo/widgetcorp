@@ -47,20 +47,32 @@ tasks:
   # ---- stack orchestration (needs deploy/docker-compose.yml) ------------
   up:
     desc: Start the core stack (docker compose, core profile)
+    preconditions:
+      - sh: test -f deploy/docker-compose.yml
+        msg: "deploy/docker-compose.yml not found yet — added by the 'base docker-compose' roadmap item."
     cmds:
       - '{{.COMPOSE}} --profile core up -d'
 
   down:
     desc: Stop the stack and remove volumes
+    preconditions:
+      - sh: test -f deploy/docker-compose.yml
+        msg: "deploy/docker-compose.yml not found yet."
     cmds:
       - '{{.COMPOSE}} down -v'
 
   ps:
     desc: Show running services
+    preconditions:
+      - sh: test -f deploy/docker-compose.yml
+        msg: "deploy/docker-compose.yml not found yet."
     cmds:
       - '{{.COMPOSE}} ps'
 
   logs:
     desc: Tail logs (use `task logs -- <service>` for one)
+    preconditions:
+      - sh: test -f deploy/docker-compose.yml
+        msg: "deploy/docker-compose.yml not found yet."
     cmds:
       - '{{.COMPOSE}} logs -f {{.CLI_ARGS}}'

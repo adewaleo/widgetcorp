@@ -1,0 +1,29 @@
+name: CI
+
+# Bootstrap CI for the monorepo. Today it validates repo-wide tooling
+# (Taskfile parses, scripts pass shellcheck). As services land, this grows
+# into the path-filtered per-service build/lint/test matrix described in
+# docs/repo-structure.md (roadmap: "CI: path-filtered build/lint/test matrix").
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Task
+        run: sh -c "$(curl -sSL https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+
+      - name: Validate Taskfile parses
+        run: task --list
+
+      - name: Shellcheck scripts
+        run: shellcheck tools/scripts/*.sh

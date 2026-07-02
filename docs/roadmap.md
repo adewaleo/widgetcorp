@@ -15,7 +15,7 @@
   - Catalog API in Go: Postgres schema, migrations, Dockerfile, health checks; first service running end-to-end. Concept #1.
 - [ ] **[P0] Go service template** — _Todo_
   - services/_templates/go: Dockerfile, /healthz+/readyz, OTel init, migrations, Makefile, tests. Concept #1.
-- [ ] **[P0] Monorepo skeleton + top-level Makefile** — _Todo_
+- [ ] **[P0] Monorepo skeleton + top-level Makefile** — _In Progress_
   - Set up monorepo layout per docs/repo-structure.md and the Makefile entrypoint (up/down/seed/load/demo-*).
 - [ ] **[P0] Python service template** — _Todo_
   - services/_templates/python: Dockerfile, /healthz+/readyz, OTel init, migrations, Makefile, tests. Concept #1.
