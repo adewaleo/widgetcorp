@@ -22,5 +22,23 @@ services:
       timeout: 5s
       retries: 5
 
+  widget-srv:
+    build:
+      context: ./widget-srv
+    container_name: widgetcorp-widget-srv
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        # Wait for postgres to pass its healthcheck before starting, so our
+        # startup migrations don't race the DB coming up.
+        condition: service_healthy
+    environment:
+      # Host is the compose service name "postgres" (resolved over the compose
+      # network), NOT localhost — from inside the container localhost is itself.
+      DATABASE_URL: postgres://widget:widget@postgres:5432/widgetdb?sslmode=disable
+      PORT: "8080"
+    ports:
+      - "8080:8080"
+
 volumes:
   postgres_data:

@@ -1,0 +1,5 @@
+# Keep the build context small. These are never needed to compile the binary.
+.git
+*.md
+Dockerfile
+.dockerignore

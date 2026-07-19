@@ -18,15 +18,13 @@ worth doing if a specific demo/lesson calls for it — not defaults.
   - graceful shutdown on SIGINT/SIGTERM via `http.Server.Shutdown` (10s drain)
   - file: `main.go`
 
+- [x] **Stage 3 — Containerize into compose project**
+  - multi-stage `widget-srv/Dockerfile` (golang-alpine build → alpine runtime,
+    static `CGO_ENABLED=0` binary, non-root), `.dockerignore`
+  - `widget-srv` service in `compose.yml`: `depends_on` postgres `service_healthy`,
+    `DATABASE_URL` -> `postgres` service name, publishes `8080:8080`
+
 ## In progress
-
-- [ ] **Stage 3 — Containerize into compose project**
-  - multi-stage `widget-srv/Dockerfile` (build in golang image, run on tiny base)
-  - `widget-srv` service in `compose.yml`: `depends_on` postgres healthcheck,
-    `DATABASE_URL` pointed at the `postgres` service name (not localhost)
-  - optional: `.dockerignore`
-
-## Upcoming
 
 - [ ] **Stage 4 — sqlc + real endpoints**
   - `sqlc.yaml` (engine=postgresql, sql_package=pgx/v5), queries in `internal/db/query/widgets.sql`
