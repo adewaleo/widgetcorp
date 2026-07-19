@@ -2,9 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/adewaleo/widgetcorp/widget-srv/internal/db"
 	"github.com/gin-gonic/gin"
@@ -61,9 +65,34 @@ func main() {
 		},
 	)
 
-	//   - listen on PORT
-	err = srv.Run(":" + srvPort)
-	if err != nil {
-		log.Fatalf("failed to start server: %v", err)
+	// 4. Serve with graceful shutdown. We wrap the gin engine in an http.Server
+	//    so we can call Shutdown() on it — gin's srv.Run does not expose that.
+	httpServer := &http.Server{
+		Addr:    ":" + srvPort,
+		Handler: srv,
 	}
+
+	// Run the listener in a goroutine so main can block waiting for a signal.
+	go func() {
+		log.Printf("listening on :%s", srvPort)
+		// ListenAndServe returns ErrServerClosed on a clean Shutdown; that's
+		// expected, so we only treat other errors as fatal.
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("server error: %v", err)
+		}
+	}()
+
+	// Block until an interrupt (Ctrl+C) or terminate (docker stop -> SIGTERM).
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("shutting down...")
+
+	// Give in-flight requests up to 10s to finish before forcing exit.
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Fatalf("forced shutdown: %v", err)
+	}
+	log.Println("server stopped")
 }
